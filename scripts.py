@@ -1,5 +1,5 @@
 from random import choice
-from datacenter.models import *
+from datacenter.models import Mark, Schoolkid, Subject
 
 
 WORDS_OF_PRAISE = [
@@ -10,6 +10,12 @@ WORDS_OF_PRAISE = [
     "Очень хороший ответ!"
 ]
 
+SUBJECT_NAMES = [
+        'Краеведение', 'География', 'Математика', 'Музыка', 'Физкультура',
+        'Изобразительное искусство', 'Технология', 'Русский язык',
+        'Литература', 'Обществознание', 'Иностранный язык', 'Биология',
+        'История', 'ОБЖ'
+    ]
 
 def fix_marks(schoolkid: Schoolkid):
     '''Исправляет все оценки ниже 4 на 5'''
@@ -64,13 +70,7 @@ def main():
     print("Все двойки и тройки были успешно заменены на пятерки.")
     remove_chastisements(child)
     print("Все замечания от учителей были успешно удалены.")
-    subject_names = [
-        'Краеведение', 'География', 'Математика', 'Музыка', 'Физкультура',
-        'Изобразительное искусство', 'Технология', 'Русский язык',
-        'Литература', 'Обществознание', 'Иностранный язык', 'Биология',
-        'История', 'ОБЖ'
-    ]
-    create_commendations(subject_names=subject_names, schoolkid=child)
+    create_commendations(subject_names=SUBJECT_NAMES, schoolkid=child)
     print("За последний урок по каждому из предметов была добавлена похвала",
           "от учителя.")
 
