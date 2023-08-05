@@ -10,70 +10,44 @@ WORDS_OF_PRAISE = [
     "Очень хороший ответ!"
 ]
 
-SUBJECT_NAMES = [
-        'Краеведение', 'География', 'Математика', 'Музыка', 'Физкультура',
-        'Изобразительное искусство', 'Технология', 'Русский язык',
-        'Литература', 'Обществознание', 'Иностранный язык', 'Биология',
-        'История', 'ОБЖ'
-    ]
-
-def fix_marks(schoolkid: Schoolkid):
-    '''Исправляет все оценки ниже 4 на 5'''
-    Mark.objects.filter(schoolkid=schoolkid, points__in=[2, 3]).update(
-        points=5)
+def get_schoolkid_by_name(name):
+    try:
+        Schoolkid.objects.get(full_name__contains=name)
+    except Schoolkid.DoesNotExist:
+        print(f"Ученик {name} не найден")
+        return None
+    except Schoolkid.MultipleObjectsReturned:
+        print(f"Найдено несколько учеников с именем {name}")
+        return None
 
 
-def remove_chastisements(schoolkid: Schoolkid):
-    '''Удаляет все замечания'''
-    Chastisement.objects.filter(schoolkid=schoolkid).delete()
-
-
-def create_commendations(subject_names: list, schoolkid: Schoolkid):
-    '''Поиск урока и выставление похвалы'''
-    all_subjects = Subject.objects.filter(year_of_study=schoolkid.year_of_study)
-    subjects_queryset = []
-    for subject_name in subject_names:
-        for subject in all_subjects:
-            if subject_name in subject.title:
-                subjects_queryset.append(subject)
-                continue
-    if not subjects_queryset:
-        return print('Урока нет.')
-    for subject in subjects_queryset:
-        random_praise = choice(WORDS_OF_PRAISE)
-        last_lesson = Lesson.objects.select_related('teacher').filter(
-            group_letter=schoolkid.group_letter,
+def create_commendation(child_name, subject_title):
+    schoolkid = get_schoolkid_by_name(child_name)
+    if schoolkid:
+        lesson = Lesson.objects.filter(
             year_of_study=schoolkid.year_of_study,
-            subject=subject).order_by('-date').first()
-        Commendation.objects.create(text=random_praise,
-                                    created=last_lesson.date,
-                                    schoolkid=schoolkid,
-                                    subject=subject,
-                                    teacher=last_lesson.teacher)
+            group_letter=schoolkid.group_letter,
+            subject__title=subject_title
+        ).order_by('-date').first()
+        compliment = random.choice(WORDS_OF_PRAISE)
+        commendation = Commendation.objects.create(
+            text=compliment,
+            created=lesson.date,
+            schoolkid=schoolkid,
+            subject=lesson.subject,
+            teacher=lesson.teacher,
+        )
 
 
-def main():
-    while True:
-        try:
-            child = Schoolkid.objects.get(
-                full_name__icontains=input('Введите ФИО ученика: '))
-            break
-        except Schoolkid.DoesNotExist:
-            print("Ученика с подобным ФИО не существует.",
-                  "Попробуйте указать полное имя ученика в следующем формате:",
-                  "Фамилия Имя Отчество.", sep='\n', end='\n\n')
-        except Schoolkid.MultipleObjectsReturned:
-            print("По введеному Вами полю было найдено несколько учеников.",
-                  "Попробуйте указать полное имя ученика в следующем формате:",
-                  "Фамилия Имя Отчество.", sep='\n', end='\n\n')
-    fix_marks(child)
-    print("Все двойки и тройки были успешно заменены на пятерки.")
-    remove_chastisements(child)
-    print("Все замечания от учителей были успешно удалены.")
-    create_commendations(subject_names=SUBJECT_NAMES, schoolkid=child)
-    print("За последний урок по каждому из предметов была добавлена похвала",
-          "от учителя.")
+def remove_chastisements(child_name):
+    schoolkid = get_schoolkid_by_name(child_name)
+    if schoolkid:
+        chastisements = Chastisement.objects.filter(schoolkid=schoolkid)
+        chastisements.delete()
 
 
-if __name__ == '__main__':
-    main()
+def fix_marks(child_name):
+    schoolkid = get_schoolkid_by_name(child_name)
+    if schoolkid:
+        bad_marks = Mark.objects.filter(schoolkid=schoolkid, points__in=[2, 3])
+        bad_marks.update(points=5)
