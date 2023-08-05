@@ -1,5 +1,5 @@
 from random import choice
-from datacenter.models import Mark, Schoolkid, Subject
+from datacenter.models import (Chastisement, Commendation, Lesson, Mark, Schoolkid, Subject)
 
 
 WORDS_OF_PRAISE = [
