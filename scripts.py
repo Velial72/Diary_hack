@@ -12,13 +12,14 @@ WORDS_OF_PRAISE = [
 
 def get_schoolkid_by_name(name):
     try:
-        Schoolkid.objects.get(full_name__contains=name)
+        name = Schoolkid.objects.get(full_name__contains=name)
+        return name
     except Schoolkid.DoesNotExist:
         print(f"Ученик {name} не найден")
-        return None
+        return 
     except Schoolkid.MultipleObjectsReturned:
         print(f"Найдено несколько учеников с именем {name}")
-        return None
+        return 
 
 
 def create_commendation(child_name, subject_title):
