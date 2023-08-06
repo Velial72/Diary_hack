@@ -25,19 +25,22 @@ def get_schoolkid_by_name(name):
 def create_commendation(child_name, subject_title):
     schoolkid = get_schoolkid_by_name(child_name)
     if schoolkid:
-        lesson = Lesson.objects.filter(
-            year_of_study=schoolkid.year_of_study,
-            group_letter=schoolkid.group_letter,
-            subject__title=subject_title
-        ).order_by('-date').first()
-        compliment = random.choice(WORDS_OF_PRAISE)
-        commendation = Commendation.objects.create(
-            text=compliment,
-            created=lesson.date,
-            schoolkid=schoolkid,
-            subject=lesson.subject,
-            teacher=lesson.teacher,
-        )
+        try:
+            lesson = Lesson.objects.filter(
+                year_of_study=schoolkid.year_of_study,
+                group_letter=schoolkid.group_letter,
+                subject__title=subject_title
+            ).order_by('-date').first()
+            compliment = random.choice(WORDS_OF_PRAISE)
+            commendation = Commendation.objects.create(
+                text=compliment,
+                created=lesson.date,
+                schoolkid=schoolkid,
+                subject=lesson.subject,
+                teacher=lesson.teacher,
+            )
+        except Lesson.DoesNotExist:
+        print(f'Урок "{subject_title}" не найден')
 
 
 def remove_chastisements(child_name):
